@@ -1,0 +1,137 @@
+	
+Кейс-задача 2.
+Создание простого файлового менеджера
+ 
+- Напишите программу на выбранном вами языке программирования для работы с файлами и директориями;
+- Реализуйте функционал отображения содержимого текущей директории, включая файлы и поддиректории;
+- Добавьте возможность создания новых файлов и директорий, а также удаления существующих;
+- Реализуйте функционал перемещения и переименования файлов и директорий;
+- Добавьте функционал поиска файлов по заданному имени или расширению.
+
+ Реализации простого файлового менеджера на Python с использованием модуля os:
+ 
+import os
+import shutil
+ 
+def list_directory():
+   """Отображает содержимое текущей директории."""
+   print("\nСодержимое текущей директории:")
+   items = os.listdir()
+   if not items:
+       print("Папка пуста.")
+   else:
+       for item in items:
+           print(f"{'[DIR]' if os.path.isdir(item) else '[FILE]'} {item}")
+ 
+def create_file(filename):
+   """Создает новый файл."""
+   try:
+       with open(filename, 'w') as f:
+           pass
+       print(f"Файл '{filename}' создан.")
+   except Exception as e:
+       print(f"Ошибка при создании файла: {e}")
+ 
+def create_directory(dirname):
+   """Создает новую директорию."""
+   try:
+       os.makedirs(dirname, exist_ok=True)
+       print(f"Директория '{dirname}' создана.")
+  except Exception as e: 
+       print(f"Ошибка при создании директории: {e}")
+ 
+def delete_item(name):
+   """Удаляет файл или директорию."""
+   try:
+       if os.path.isdir(name):
+           shutil.rmtree(name)
+           print(f"Директория '{name}' удалена.")
+       elif os.path.isfile(name):
+           os.remove(name)
+           print(f"Файл '{name}' удален.")
+       else:
+           print(f"Элемент '{name}' не найден.")
+   except Exception as e:
+       print(f"Ошибка при удалении: {e}")
+ 
+def move_item(source, destination):
+   """Перемещает или переименовывает файл/директорию."""
+   try:
+       shutil.move(source, destination)
+       print(f"'{source}' перемещен/переименован в '{destination}'.")
+   except Exception as e:
+       print(f"Ошибка при перемещении/переименовании: {e}")
+ 
+def search_files(keyword, extension=None):
+   """Ищет файлы по имени или расширению."""
+   print(f"\nРезультаты поиска для '{keyword}'{f' с расширением {extension}' if extension else ''}:")
+   found = False
+  for root, dirs, files in os.walk('.'): 
+       for file in files:
+           if keyword in file and (extension is None or file.endswith(extension)):
+               print(os.path.join(root, file))
+               found = True
+   if not found:
+       print("Ничего не найдено.")
+ 
+def main():
+   while True:
+       print("\nФайловый менеджер:")
+       print("1. Просмотреть содержимое текущей директории")
+       print("2. Создать файл")
+       print("3. Создать директорию")
+       print("4. Удалить файл/директорию")
+       print("5. Переместить/переименовать файл/директорию")
+       print("6. Поиск файлов")
+       print("7. Выйти")
+       
+       choice = input("Выберите действие: ")
+       
+       if choice == '1':
+           list_directory()
+       elif choice == '2':
+           filename = input("Введите имя файла для создания: ")
+           create_file(filename)
+       elif choice == '3':
+           dirname = input("Введите имя директории для создания: ")
+           create_directory(dirname)
+       elif choice == '4':
+           name = input("Введите имя файла/директории для удаления: ")
+           delete_item(name)
+       elif choice == '5':
+           source = input("Введите имя файла/директории для перемещения/переименования: ")
+           destination = input("Введите новое имя или путь: ")
+           move_item(source, destination)
+       elif choice == '6':
+           keyword = input("Введите ключевое слово для поиска: ")
+           extension = input("Введите расширение (нажмите Enter, чтобы пропустить): ") or None
+           search_files(keyword, extension)
+       elif choice == '7':
+           print("Выход из программы.")
+           break
+       else:
+           print("Неверный выбор. Попробуйте снова.")
+ 
+if __name__ == "__main__":
+   main()
+ 
+Ключевые моменты программы:
+1. Просмотр содержимого директории:
+⎯ Используется os.listdir() для получения списка файлов и папок в текущей директории.
+⎯ Файлы и папки различаются в выводе.
+2. Создание файлов и папок:
+⎯ Создаются пустые файлы с помощью open() и папки с помощью os.makedirs().
+3. Удаление файлов и папок:
+⎯ Для удаления папок используется shutil.rmtree(), а для файлов — os.remove().
+4. Перемещение и переименование:
+⎯ Реализовано с использованием shutil.move().
+5. Поиск файлов:
+⎯ Рекурсивный поиск выполняется с использованием os.walk().
+6. Удобный интерфейс:
+⎯ Пользователь выбирает действия из меню.
+⎯  
+Как использовать:
+1. Скопировать код в файл Python (например, file_manager.py).
+2. Запустить программу командой python file_manager.py.
+3. Использовать меню для выполнения действий с файлами и директориями.
+  
