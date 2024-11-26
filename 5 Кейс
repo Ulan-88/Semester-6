@@ -1,0 +1,285 @@
+	
+Кейс-задача 5.
+Проектирование базы данных для управления задачами
+ 
+- Определите структуру базы данных для управления задачами. Рассмотрите таблицы для задач, пользователей и проектов;
+- Определите связи между таблицами, например, каждая задача должна быть связана с определенным пользователем и проектом;
+- Создайте схему базы данных на основе определенной структуры и используйте выбранную систему управления базами данных (например, MySQL, PostgreSQL или SQLite);
+- Реализуйте функционал добавления, удаления и обновления задач, пользователей и проектов в базе данных;
+- Напишите запросы на извлечение информации из базы данных, например, список задач, принадлежащих определенному пользователю или проекту.
+
+
+
+Шаг 1: Определение структуры базы данных
+Структура базы данных включает три таблицы:
+
+1. Users (Пользователи):
+⎯ id – уникальный идентификатор пользователя.
+⎯ name – имя пользователя.
+⎯ email – электронная почта.
+2. Projects (Проекты):
+⎯ id – уникальный идентификатор проекта.
+⎯ name – название проекта.
+⎯ description – описание проекта.
+3. Tasks (Задачи):
+⎯ id – уникальный идентификатор задачи.
+⎯ title – название задачи.
+⎯ description – описание задачи.
+⎯ status – статус задачи (например, "в процессе", "завершено").
+⎯ user_id – связь с таблицей Users.
+⎯ project_id – связь с таблицей Projects.
+Шаг 2: Связи между таблицами
+⎯ Каждый пользователь (Users) может быть связан с несколькими задачами (Tasks).
+⎯ Каждый проект (Projects) может быть связан с несколькими задачами (Tasks).
+⎯ Каждая задача (Tasks) связана только с одним проектом и одним пользователем.
+Шаг 3: Схема базы данных
+Схема базы данных для SQLite:
+
+CREATE TABLE Users (
+
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+   name TEXT NOT NULL,
+
+   email TEXT NOT NULL UNIQUE
+
+);
+
+ 
+
+CREATE TABLE Projects (
+
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+   name TEXT NOT NULL,
+
+   description TEXT
+
+);
+
+ 
+
+CREATE TABLE Tasks (
+
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+   title TEXT NOT NULL,
+
+   description TEXT,
+
+   status TEXT DEFAULT 'in progress',
+
+   user_id INTEGER,
+
+   project_id INTEGER,
+
+   FOREIGN KEY (user_id) REFERENCES Users (id),
+
+   FOREIGN KEY (project_id) REFERENCES Projects (id)
+
+);
+
+ 
+
+Шаг 4: Реализация операций с базой данных
+Python-код для управления базой данных:
+import sqlite3
+
+ 
+
+# Создание и подключение к базе данных
+
+conn = sqlite3.connect("tasks_management.db")
+
+cursor = conn.cursor()
+
+ 
+
+# Создание таблиц
+
+def create_tables():
+
+   cursor.execute("""
+
+   CREATE TABLE IF NOT EXISTS Users (
+
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+       name TEXT NOT NULL,
+
+       email TEXT NOT NULL UNIQUE
+
+   )""")
+
+ 
+
+   cursor.execute("""
+
+   CREATE TABLE IF NOT EXISTS Projects (
+
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+       name TEXT NOT NULL,
+
+       description TEXT
+
+   )""")
+
+ 
+
+   cursor.execute("""
+
+   CREATE TABLE IF NOT EXISTS Tasks (
+
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+       title TEXT NOT NULL,
+
+       description TEXT,
+
+       status TEXT DEFAULT 'in progress',
+
+       user_id INTEGER,
+
+       project_id INTEGER,
+
+       FOREIGN KEY (user_id) REFERENCES Users (id),
+
+       FOREIGN KEY (project_id) REFERENCES Projects (id)
+
+   )""")
+
+   conn.commit()
+
+ 
+
+# Добавление записи
+
+def add_user(name, email):
+
+   cursor.execute("INSERT INTO Users (name, email) VALUES (?, ?)", (name, email))
+
+   conn.commit()
+
+ 
+
+def add_project(name, description):
+
+   cursor.execute("INSERT INTO Projects (name, description) VALUES (?, ?)", (name, description))
+
+   conn.commit()
+
+ 
+
+def add_task(title, description, status, user_id, project_id):
+
+   cursor.execute("""
+
+   INSERT INTO Tasks (title, description, status, user_id, project_id)
+
+   VALUES (?, ?, ?, ?, ?)""", (title, description, status, user_id, project_id))
+
+   conn.commit()
+
+ 
+
+# Удаление записи
+
+def delete_task(task_id):
+
+   cursor.execute("DELETE FROM Tasks WHERE id = ?", (task_id,))
+
+   conn.commit()
+
+ 
+
+# Обновление записи
+
+def update_task_status(task_id, new_status):
+
+   cursor.execute("UPDATE Tasks SET status = ? WHERE id = ?", (new_status, task_id))
+
+   conn.commit()
+
+ 
+
+# Извлечение данных
+
+def get_tasks_by_user(user_id):
+
+   cursor.execute("SELECT * FROM Tasks WHERE user_id = ?", (user_id,))
+
+   return cursor.fetchall()
+
+ 
+
+def get_tasks_by_project(project_id):
+
+   cursor.execute("SELECT * FROM Tasks WHERE project_id = ?", (project_id,))
+
+   return cursor.fetchall()
+
+ 
+
+# Основной код
+
+if __name__ == "__main__":
+
+   create_tables()
+
+ 
+
+   # Примеры добавления данных
+
+   add_user("Alice", "alice@example.com")
+
+   add_user("Bob", "bob@example.com")
+
+   add_project("Project A", "Description of Project A")
+
+   add_project("Project B", "Description of Project B")
+
+   add_task("Task 1", "Task 1 description", "in progress", 1, 1)
+
+   add_task("Task 2", "Task 2 description", "completed", 2, 1)
+
+ 
+
+   # Примеры извлечения данных
+
+   print("Tasks for User ID 1:")
+
+   print(get_tasks_by_user(1))
+
+ 
+
+   print("Tasks for Project ID 1:")
+
+   print(get_tasks_by_project(1))
+
+ 
+
+   conn.close()
+
+ 
+Шаг 5: Запросы на извлечение информации
+1. Список задач, принадлежащих определенному пользователю:
+SELECT * FROM Tasks WHERE user_id = 1;
+
+2. Список задач, относящихся к определенному проекту:
+SELECT * FROM Tasks WHERE project_id = 1;
+
+3. Список всех задач с их пользователями и проектами:
+SELECT Tasks.id, Tasks.title, Tasks.status, Users.name AS user_name, Projects.name AS project_name
+
+FROM Tasks
+
+JOIN Users ON Tasks.user_id = Users.id
+
+JOIN Projects ON Tasks.project_id = Projects.id;
+
+ 
+
+⎯ База данных позволяет управлять пользователями, проектами и задачами.
+⎯ Реализованы операции добавления, удаления, обновления и извлечения данных.
+⎯ Код легко адаптируется под другие СУБД (MySQL, PostgreSQL) с минимальными изменениями.
